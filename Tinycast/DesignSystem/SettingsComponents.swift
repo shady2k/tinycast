@@ -270,7 +270,7 @@ private struct SettingsEditorPanelSurface: ViewModifier {
         let shape = RoundedRectangle(cornerRadius: Theme.Radius.panel, style: .continuous)
         content
             .background(Theme.Colors.panelScrim, in: shape)
-            .glassEffect(.regular, in: shape)
+            .compatGlass(in: shape)
     }
 }
 

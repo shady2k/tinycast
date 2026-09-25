@@ -145,8 +145,7 @@ private struct AIChatComposer: View {
         }
         .padding(Theme.Spacing.xl)
         .background {
-            Color.clear.glassEffect(
-                .regular, in: RoundedRectangle(cornerRadius: Theme.Radius.dialog, style: .continuous))
+            Color.clear.compatGlass(in: RoundedRectangle(cornerRadius: Theme.Radius.dialog, style: .continuous))
         }
     }
 
@@ -390,7 +389,7 @@ private struct FindCounter: View {
         .buttonStyle(.borderless)
         .padding(.horizontal, Theme.Spacing.lg)
         .padding(.vertical, Theme.Spacing.sm)
-        .glassEffect(.regular, in: Capsule())
+        .compatGlass(in: Capsule())
     }
 }
 
@@ -504,7 +503,7 @@ private struct ContextCard: View {
         }
         .padding(Theme.Spacing.xl)
         .frame(width: Theme.Size.chatContextCard, alignment: .leading)
-        .glassEffect(.regular, in: shape)
+        .compatGlass(in: shape)
         // Solid under the glass: the card rises over the transcript, whose text must not show through.
         .background { shape.fill(Theme.Colors.windowSurface) }
         .shadow(color: Theme.Colors.tooltipShadow, radius: Theme.Spacing.xl, y: Theme.Spacing.xs)
@@ -560,7 +559,7 @@ extension View {
     /// The composer's menus read as options, not links: a capsule the size of the row.
     fileprivate func composerPill() -> some View {
         menuStyle(.button)
-            .buttonStyle(.glass)
+            .compatGlassButtonStyle()
             .buttonBorderShape(.capsule)
             .fixedSize()
     }

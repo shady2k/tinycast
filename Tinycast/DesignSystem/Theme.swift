@@ -508,6 +508,6 @@ enum Theme {
 extension View {
     /// A floating glass control surface: clear, interactive Liquid Glass.
     func frosted(in shape: some Shape) -> some View {
-        glassEffect(.clear.interactive(), in: shape)
+        compatGlass(clearInteractive: true, in: shape)
     }
 }

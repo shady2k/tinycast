@@ -89,8 +89,11 @@ enum AppLauncher {
         let center = NSWorkspace.shared.notificationCenter
         let (exits, continuation) = AsyncStream.makeStream(of: pid_t.self)
         let observer = center.addObserver(
-            of: NSWorkspace.shared, for: NSWorkspace.DidTerminateApplicationMessage.self
-        ) { continuation.yield($0.application.processIdentifier) }
+            forName: NSWorkspace.didTerminateApplicationNotification, object: nil, queue: .main
+        ) { note in
+            let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
+            if let pid = app?.processIdentifier { continuation.yield(pid) }
+        }
         defer { center.removeObserver(observer) }
 
         var pending = Set(apps.map(\.processIdentifier))

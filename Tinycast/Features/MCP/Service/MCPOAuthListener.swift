@@ -16,6 +16,7 @@ final class MCPOAuthListener {
         state: String, issuer: String, requiresIssuer: Bool, timeout: Duration = .seconds(300)
     ) async throws {
         guard result == nil else { throw CancellationError() }
+        guard #available(macOS 26, *) else { throw MCPOAuth.Failure.listenerUnavailable }
         let listener = try NetworkListener(
             using: .parameters { TCP() }
                 .localEndpoint(.hostPort(host: .ipv4(.loopback), port: 4962)))
@@ -71,6 +72,7 @@ final class MCPOAuthListener {
         task = nil
     }
 
+    @available(macOS 26, *)
     private func run(
         _ listener: NetworkListener<TCP>, state: String, issuer: String, requiresIssuer: Bool
     ) async throws {
@@ -88,6 +90,7 @@ final class MCPOAuthListener {
         }
     }
 
+    @available(macOS 26, *)
     private func read(
         _ connection: NetworkConnection<TCP>, state: String, issuer: String, requiresIssuer: Bool
     ) async throws {
@@ -132,6 +135,7 @@ final class MCPOAuthListener {
         if let outcome { self.finish(outcome) }
     }
 
+    @available(macOS 26, *)
     private func receive(
         _ connection: NetworkConnection<TCP>, state: String, issuer: String, requiresIssuer: Bool
     ) async {

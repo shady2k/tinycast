@@ -80,7 +80,7 @@ struct ExtensionActionsPanel: View {
                 verticalOffset: -metrics.spacing.xxs / 2)
         }
         .frame(width: panel.width)
-        .glassEffect(.regular, in: shape)
+        .compatGlass(in: shape)
     }
 
     @ViewBuilder

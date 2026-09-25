@@ -38,6 +38,7 @@ enum TextTranslator {
     static func translate(_ text: String, to target: Locale.Language) async throws -> String {
         guard let source = sourceLanguage(of: text) else { throw Failure.undetectableSource }
         guard !source.isEquivalent(to: target) else { return text }
+        guard #available(macOS 26, *) else { throw Failure.unsupported }
         switch await LanguageAvailability().status(from: source, to: target) {
         case .installed:
             break
