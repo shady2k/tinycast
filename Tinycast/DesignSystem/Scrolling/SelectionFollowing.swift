@@ -40,11 +40,15 @@ private struct SelectionFollowing: ViewModifier {
     @State private var selection: CGRect?
     /// Where the selection is still owed a place; nil once it has one, and the pointer owns it.
     @State private var target: Target?
+    /// Set until the list rests at its origin: Sequoia can land a `scrollTo` under the header.
+    @State private var originOwed = false
 
     /// The geometry the rule reads: the band's height, and the inset whose settling moves the rest.
     private struct Band: Equatable {
         var insetTop: CGFloat
         var height: CGFloat
+        /// How far the content sits past its resting offset; 0 at the origin.
+        var beyondOrigin: CGFloat = 0
     }
 
     private enum Target {
@@ -57,9 +61,14 @@ private struct SelectionFollowing: ViewModifier {
     func body(content: Content) -> some View {
         content
             .onScrollGeometryChange(for: Band.self) {
-                Band(insetTop: $0.contentInsets.top, height: $0.containerSize.height)
+                Band(
+                    insetTop: $0.contentInsets.top, height: $0.containerSize.height,
+                    beyondOrigin: $0.contentOffset.y + $0.contentInsets.top)
             } action: { old, new in
                 band = new
+                if originOwed {
+                    if abs(new.beyondOrigin) < 0.5 { originOwed = false } else { scrollToOrigin() }
+                }
                 // The inset settles after mount and moves the resting offset: restate a landing.
                 if old.insetTop != new.insetTop, scroll.kind != .follow {
                     return begin(scroll.kind)
@@ -70,6 +79,9 @@ private struct SelectionFollowing: ViewModifier {
                 selection = frame
                 align()
             }
+            .onScrollPhaseChange { _, phase in
+                if phase == .interacting { originOwed = false }
+            }
             .onChange(of: scroll) { _, scroll in begin(scroll.kind) }
     }
 
@@ -77,14 +89,21 @@ private struct SelectionFollowing: ViewModifier {
         switch kind {
         case .top:
             target = nil
-            proxy.scrollToOrigin()
+            scrollToOrigin()
         case .follow:
             target = .band
+            originOwed = false
             align()
         case .center:
             target = .middle
+            originOwed = false
             align()
         }
+    }
+
+    private func scrollToOrigin() {
+        originOwed = true
+        proxy.scrollToOrigin()
     }
 
     private func align() {
@@ -92,7 +111,7 @@ private struct SelectionFollowing: ViewModifier {
         // Origin, not the row's top, so the first row's section header stays on screen.
         if atOrigin {
             self.target = nil
-            return proxy.scrollToOrigin()
+            return scrollToOrigin()
         }
         // The lazy stack dropped the selected row: bring it back by id, then re-check its frame.
         guard let selection else {
